@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AeroVento: ¿cuánto pagas de luz?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F6F3;--surface:#fff;--ink:#10261D;--muted:#4F645A;--line:#D3DFD8;--brand:#006C49;--on-brand:#fff;--valle:#2F6FB3;--normal:#B7791F;--punta:#C23B4E;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1914;--surface:#15251D;--ink:#E8F2ED;--muted:#9DB5A9;--line:#2A4237;--brand:#3DDC97;--on-brand:#06281A;--valle:#6AA6E8;--normal:#E0B04A;--punta:#F07A8A;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0D1914;--surface:#15251D;--ink:#E8F2ED;--muted:#9DB5A9;--line:#2A4237;--brand:#3DDC97;--on-brand:#06281A;--valle:#6AA6E8;--normal:#E0B04A;--punta:#F07A8A;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif}
+main{max-width:880px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.15;margin:0 0 8px}
+h2{font-size:22px;margin:0 0 4px}
+p{margin:0}.muted{color:var(--muted)}
+section{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:16px}
+.top{display:flex;gap:16px;align-items:end;flex-wrap:wrap;margin:8px 0 8px}
+label{font-weight:700;display:block;margin-bottom:4px}
+input[type=text],input[type=number],input[type=month],select{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-height:48px}
+input:focus-visible,button:focus-visible,.col:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:12px}
+.prices div{border-left:6px solid var(--c);padding-left:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+button{font:inherit;font-weight:700;border:2px solid var(--brand);background:transparent;color:var(--brand);border-radius:999px;padding:10px 16px;min-height:44px;cursor:pointer}
+button:hover{background:color-mix(in srgb,var(--brand) 12%,transparent)}
+button.primary{background:var(--brand);color:var(--on-brand)}
+.readout{min-height:30px;font-weight:700}
+.plot{display:flex;gap:2px;height:220px;touch-action:none;user-select:none;cursor:pointer}
+.col{flex:1;position:relative;border-radius:6px 6px 0 0;background:color-mix(in srgb,var(--c) 14%,transparent);overflow:hidden}
+.col i{position:absolute;left:0;right:0;bottom:0;background:var(--c);transition:height .12s;border-radius:4px 4px 0 0}
+.col.on{outline:2px solid var(--ink);outline-offset:-2px}
+.hours{display:flex;gap:2px;font-size:12px;color:var(--muted);margin-top:4px}
+.hours span{flex:1;text-align:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;font-size:16px}
+.legend b::before{content:"";display:inline-block;width:14px;height:14px;border-radius:4px;background:var(--c);margin-right:6px;vertical-align:-2px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.plan{border:2px solid var(--line);border-radius:14px;padding:16px}
+.plan.win{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 9%,transparent)}
+.plan .tag{font-weight:700;color:var(--brand);min-height:26px}
+.plan .big{font-size:clamp(26px,6vw,36px);font-weight:700}
+.verdict{font-size:clamp(20px,4.5vw,26px);font-weight:700;margin:6px 0 4px}
+.row{display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:center;margin-top:10px}
+.bar{height:14px;border-radius:7px;background:var(--bg);overflow:hidden}.bar i{display:block;height:100%;background:var(--c);transition:width .2s}
+table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}td:last-child,th:last-child{text-align:right}
+ul{padding-left:20px;margin:10px 0 0}li{margin-bottom:10px}.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 18px;margin:12px 0}.total{font-size:26px;font-weight:700;color:var(--brand);margin-top:12px}h3{font-size:18px;margin:18px 0 0}#factura{display:none}#factura.open{display:block}
+@media (max-width:560px){.cmp{grid-template-columns:1fr}.hours span:not(:nth-child(3n+1)){visibility:hidden}.row{grid-template-columns:70px 1fr auto}}
+@media print{body{background:#fff;color:#000}main>*:not(#factura){display:none!important}#factura{display:block!important;border:0}button,#factura .top,#msg{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <h1>¿Cuánto pagas de luz?</h1>
+  <p class="muted">Dibuja cuánta energía usas cada hora y mira al instante qué plan te conviene.</p>
+
+  <section>
+    <div class="top">
+      <div style="flex:1;min-width:160px"><label for="casa">Número de casa o cliente</label><input id="casa" type="text" value="12" autocomplete="off"></div><div style="flex:2;min-width:200px"><label for="cliente">Nombre del cliente (para la factura)</label><input id="cliente" type="text" placeholder="Ej.: María Pérez" autocomplete="off"></div>
+    </div>
+    <div class="top"><div style="flex:1;min-width:170px"><label for="nit">NIT del cliente (sin dígito)</label><input id="nit" type="text" inputmode="numeric" placeholder="Ej.: 900123456" autocomplete="off"></div><div style="flex:1;min-width:170px"><label for="ciudad">Ciudad de facturación</label><input id="ciudad" type="text" placeholder="Ej.: Medellín" autocomplete="off"></div><div style="flex:1;min-width:170px"><label for="mes">Mes a facturar</label><input id="mes" type="month"></div><div style="flex:1;min-width:170px"><label for="convenio">Código de convenio (opcional)</label><input id="convenio" type="text" inputmode="numeric" autocomplete="off"></div></div>
+    <div class="top"><div style="flex:1;min-width:170px"><label for="estrato">Estrato socioeconómico</label><select id="estrato"><option value="1">Estrato 1</option><option value="2">Estrato 2</option><option value="3">Estrato 3</option><option value="4" selected>Estrato 4</option><option value="5">Estrato 5</option><option value="6">Estrato 6</option></select></div><div style="flex:1;min-width:170px"><label for="clima">Clima de tu zona</label><select id="clima"><option value="173">Cálido (menos de 1.000 m s. n. m.)</option><option value="130">Templado o frío (1.000 m o más)</option></select></div><div style="flex:1;min-width:170px"><label for="pct" id="lpct">Porcentaje aplicado (%)</label><input id="pct" type="number" min="0" max="60" inputmode="numeric"></div></div>
+    <p class="muted" id="estnota"></p>
+    <h2>Precio por kWh</h2>
+    <p class="muted">Ya están los precios de ejemplo. Cámbialos si tu tarifa es distinta.</p>
+    <div class="prices">
+      <div style="--c:var(--valle)"><label for="p-valle">Valle</label><input id="p-valle" type="number" inputmode="numeric" min="0" value="500"></div>
+      <div style="--c:var(--normal)"><label for="p-normal">Normal</label><input id="p-normal" type="number" inputmode="numeric" min="0" value="800"></div>
+      <div style="--c:var(--punta)"><label for="p-punta">Punta</label><input id="p-punta" type="number" inputmode="numeric" min="0" value="1200"></div>
+      <div style="--c:var(--muted)"><label for="p-plano">Plan plano</label><input id="p-plano" type="number" inputmode="numeric" min="0" value="800"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tu consumo en un día</h2>
+    <p class="muted">Toca o arrastra sobre las barras para subir o bajar los kWh de cada hora.</p>
+    <div class="chips" id="presets">
+      <button data-p="uno">Todo el día igual</button>
+      <button data-p="trabajo">Trabajo fuera de casa</button>
+      <button data-p="casa">Estoy en casa</button>
+      <button data-p="cero">Borrar todo</button>
+    </div>
+    <div class="readout" id="readout" aria-live="polite">Toca una barra para ver su hora.</div>
+    <div class="plot" id="plot" role="group" aria-label="Consumo por hora"></div>
+    <div class="hours" id="hours"></div>
+    <div class="legend">
+      <span style="--c:var(--valle)"><b>Valle</b> 10 p. m. a 5 a. m.</span>
+      <span style="--c:var(--normal)"><b>Normal</b> 6 a. m. a 5 p. m.</span>
+      <span style="--c:var(--punta)"><b>Punta</b> 6 p. m. a 9 p. m.</span>
+    </div>
+  </section>
+
+  <section id="resultado" aria-live="polite">
+    <h2>Tu resultado</h2>
+    <div class="verdict" id="verdict"></div>
+    <p class="muted" id="tip"></p>
+    <div class="cmp">
+      <div class="plan" id="c-fr"><div class="tag"></div><div>Plan por franjas</div><div class="big"></div></div>
+      <div class="plan" id="c-pl"><div class="tag"></div><div>Plan plano</div><div class="big"></div></div>
+    </div>
+    <div id="rows" style="margin-top:12px"></div>
+    <div class="chips"><button class="primary" id="btnPdf1">Descargar factura PDF</button><button id="btnFactura">Ver factura</button></div>
+  </section>
+
+  <section id="ahorro"><h2>Sugerencias para ahorrar</h2><ul id="tips"></ul></section>
+
+  <section id="factura">
+    <h2>Factura de energía</h2>
+    <p class="muted">Vista previa. El PDF trae el formato completo, con sugerencias y una guía para leerlo.</p>
+    <div id="f-view"></div>
+    <div class="top" style="margin-top:16px"><div style="flex:1;min-width:200px"><label for="f-plan">Plan a facturar</label><select id="f-plan"><option value="auto">El más barato</option><option value="franjas">Por franjas</option><option value="plano">Plano</option></select></div></div>
+    <div class="chips"><button class="primary" id="btnPdf2">Descargar factura PDF</button><button onclick="window.print()">Imprimir</button></div>
+    <p class="muted" id="msg" role="status"></p>
+  </section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const MAX=5,STEP=.5,$=id=>document.getElementById(id);
+const Z=h=>h>=18&&h<=21?"punta":(h>=6&&h<=17?"normal":"valle");
+const NAME={valle:"Valle",normal:"Normal",punta:"Punta"};
+const money=n=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(n);
+const kf=n=>n.toLocaleString("es-CO",{maximumFractionDigits:1});
+const hl=h=>String(h).padStart(2,"0")+":00";
+let kwh=Array(24).fill(1),last=-1;
+const plot=$("plot"),cols=[];
+for(let h=0;h<24;h++){
+  const c=document.createElement("div");c.className="col";c.tabIndex=0;c.setAttribute("role","slider");
+  c.setAttribute("aria-valuemin",0);c.setAttribute("aria-valuemax",MAX);c.style.setProperty("--c",`var(--${Z(h)})`);
+  c.innerHTML="<i></i>";
+  c.addEventListener("focus",()=>{last=h;show()});
+  c.addEventListener("keydown",e=>{
+    const d=e.key==="ArrowUp"||e.key==="ArrowRight"?STEP:e.key==="ArrowDown"||e.key==="ArrowLeft"?-STEP:0;
+    if(d){e.preventDefault();set(h,kwh[h]+d)}
+  });
+  plot.appendChild(c);cols.push(c);
+  const s=document.createElement("span");s.textContent=h;$("hours").appendChild(s);
+}
+function set(h,v){kwh[h]=Math.min(MAX,Math.max(0,Math.round(v/STEP)*STEP));last=h;update()}
+function fromPointer(e){
+  const r=plot.getBoundingClientRect();
+  const h=Math.min(23,Math.max(0,Math.floor((e.clientX-r.left)/r.width*24)));
+  set(h,(r.bottom-e.clientY)/r.height*MAX);
+}
+let drag=false;
+plot.addEventListener("pointerdown",e=>{drag=true;plot.setPointerCapture(e.pointerId);fromPointer(e)});
+plot.addEventListener("pointermove",e=>{if(drag)fromPointer(e);else{const r=plot.getBoundingClientRect();last=Math.min(23,Math.max(0,Math.floor((e.clientX-r.left)/r.width*24)));show()}});
+plot.addEventListener("pointerup",()=>drag=false);
+plot.addEventListener("pointercancel",()=>drag=false);
+function show(){
+  cols.forEach((c,i)=>c.classList.toggle("on",i===last));
+  if(last>=0)$("readout").textContent=`${hl(last)}: ${kf(kwh[last])} kWh, franja ${NAME[Z(last)].toLowerCase()}`;
+}
+const P={
+  uno:()=>kwh.map(()=>1),
+  trabajo:()=>kwh.map((_,h)=>h<6?.5:h<8?2:h<17?.5:h<22?3:1),
+  casa:()=>kwh.map((_,h)=>h<6?.5:h<18?2:h<22?3.5:1),
+  cero:()=>kwh.map(()=>0)
+};
+$("presets").addEventListener("click",e=>{const b=e.target.closest("button");if(b){kwh=P[b.dataset.p]();update()}});
+const price=()=>({valle:+$("p-valle").value||0,normal:+$("p-normal").value||0,punta:+$("p-punta").value||0,plano:+$("p-plano").value||0});
+function calc(){
+  const p=price(),t={valle:0,normal:0,punta:0};let tot=0,peak=0;
+  kwh.forEach((v,h)=>{t[Z(h)]+=v;tot+=v;if(v>kwh[peak])peak=h});
+  const cost={valle:t.valle*p.valle,normal:t.normal*p.normal,punta:t.punta*p.punta};
+  const fr=cost.valle+cost.normal+cost.punta,pl=tot*p.plano;
+  return{p,t,cost,fr,pl,tot,peak};
+}
+function update(){
+  const r=calc(),diff=Math.abs(r.pl-r.fr);
+  kwh.forEach((v,h)=>{cols[h].firstChild.style.height=v/MAX*100+"%";cols[h].setAttribute("aria-valuenow",v);cols[h].setAttribute("aria-label",`${hl(h)}, ${kf(v)} kilovatios hora`)});
+  show();
+  const win=r.fr<r.pl?"fr":r.fr>r.pl?"pl":"eq";
+  $("verdict").textContent=r.tot===0?"Dibuja tu consumo para ver el resultado.":
+    win==="fr"?`Te conviene el plan por franjas: ahorras ${money(diff)} al día.`:
+    win==="pl"?`Te conviene el plan plano: ahorras ${money(diff)} al día.`:"Los dos planes cuestan lo mismo.";
+  const share=r.tot?r.t.punta/r.tot:0;
+  $("tip").textContent=r.tot===0?"":`Tu hora de mayor consumo es ${hl(r.peak)} (franja ${NAME[Z(r.peak)].toLowerCase()}). ${share>.4?"Más de un 40 % de tu energía cae en la franja punta, la más cara. Mover algunos usos a otra hora te ahorra dinero.":"Usar menos energía de 6 p. m. a 9 p. m. es lo que más baja tu cuenta."}`;
+  const set2=(id,tag,val)=>{const e=$(id);e.classList.toggle("win",tag);e.querySelector(".tag").textContent=tag?"Más barato":"";e.querySelector(".big").textContent=money(val)};
+  set2("c-fr",r.tot>0&&win==="fr",r.fr);set2("c-pl",r.tot>0&&win==="pl",r.pl);
+  $("rows").innerHTML=["valle","normal","punta"].map(z=>`<div class="row" style="--c:var(--${z})"><b>${NAME[z]}</b><div class="bar"><i style="width:${r.tot?r.t[z]/r.tot*100:0}%"></i></div><span>${kf(r.t[z])} kWh · ${money(r.cost[z])}</span></div>`).join("");
+  renderExtras();
+}
+["casa","cliente","nit","ciudad","mes","convenio","clima","pct","p-valle","p-normal","p-punta","p-plano"].forEach(id=>$(id).addEventListener("input",update));
+$("btnFactura").addEventListener("click",()=>{const f=$("factura"),o=f.classList.toggle("open");$("btnFactura").textContent=o?"Ocultar factura":"Ver factura";if(o)f.scrollIntoView({behavior:"smooth"})});
+const RNG={valle:"22:00 a 05:59",normal:"06:00 a 17:59",punta:"18:00 a 21:59"};
+function nitDV(n){const w=[3,7,13,17,19,23,29,37,41,43,47,53,59,67,71];let t=0;[...n].reverse().forEach((c,i)=>t+=(+c)*w[i]);const r=t%11;return r>1?11-r:r}
+function inv(){
+  const r=calc(),mes=$("mes").value||new Date().toISOString().slice(0,7),[Y,M]=mes.split("-").map(Number),dias=new Date(Y,M,0).getDate();
+  let plan=$("f-plan").value;if(plan==="auto")plan=r.fr<=r.pl?"franjas":"plano";
+  const nd=$("nit").value.replace(/\D/g,"").slice(0,15),pad=n=>String(n).padStart(2,"0");
+  const nit=nd?nd.replace(/\B(?=(\d{3})+(?!\d))/g,".")+"-"+nitDV(nd):"No indicado";
+  const casa=$("casa").value.trim()||"sin número",cd=casa.replace(/\D/g,""),now=new Date(),lim=new Date(now.getTime()+864e6);
+  const base=Y+pad(M)+nd.slice(-6).padStart(6,"0")+cd.slice(-4).padStart(4,"0");
+  const ref=base+(10-[...base].reduce((a,c)=>a+ +c,0)%10)%10;
+  const t=plan==="franjas"?r.fr:r.pl,al=plan==="franjas"?r.pl:r.fr,E=+$("estrato").value,L=+$("clima").value,pp=Math.min(DEF[E],Math.max(0,+$("pct").value||0));const ad=(c,k)=>{const mc=c*dias,mk=k*dias,u=mk?mc/mk:0,sub=E<=3?pp/100*Math.min(mk,L)*u:0,con=E>=5?pp/100*mc:0;return{base:mc,sub,con,net:mc-sub+con,cover:Math.min(mk,L)}};const A=ad(t,r.tot),B=ad(al,r.tot);
+  return{r,plan,dias,nd,nit,casa,now,lim,ref,num:"AV-"+Y+pad(M)+"-"+nd.slice(-4).padStart(4,"0")+cd.slice(-3).padStart(3,"0"),
+    MES:new Date(Y,M-1,1).toLocaleDateString("es-CO",{month:"long",year:"numeric"}),
+    cli:$("cliente").value.trim()||"No indicado",ciudad:$("ciudad").value.trim()||"No indicada",conv:$("convenio").value.trim()||"No aplica",
+    E,pp,L,A,mTot:A.net,mAlt:B.net,altN:plan==="franjas"?"plano":"por franjas"};
+}
+function tips(r,D,v){
+  if(r.tot===0)return["Dibuja tu consumo para recibir sugerencias."];
+  const o=[],p=r.p,mv=r.t.punta/2,gan=mv*(p.punta-p.valle)*D;
+  if(r.t.punta===0)o.push("No usas energía en la franja punta, que es la más cara. Sigue así.");
+  else if(gan>0)o.push(`Pasa a la franja valle (10 p. m. a 5 a. m.) la mitad de lo que gastas en punta, ${kf(mv)} kWh al día. Ahorrarías unos ${money(gan)} al mes. Prueba con la lavadora, la plancha o la carga de equipos.`);
+  o.push(r.fr<=r.pl?`Mantén el plan por franjas: con tu consumo pagas ${money((r.pl-r.fr)*D)} menos al mes que con el plan plano.`:`Con tu consumo conviene el plan plano: el de franjas costaría ${money((r.fr-r.pl)*D)} más al mes. Si mueves consumo a la noche, esto puede cambiar.`);
+  o.push(`Tu hora de mayor consumo es ${hl(r.peak)} (franja ${NAME[Z(r.peak)].toLowerCase()}). Evita encender varios equipos grandes a la vez.`);
+  const nm=Math.min(...kwh.filter((_,h)=>Z(h)==="valle"));
+  if(nm>=.5)o.push(`De noche nunca bajas de ${kf(nm)} kWh por hora. Desconecta equipos en espera, cargadores y televisores que no uses.`);
+  if(v&&v.E<=3&&r.tot*D>v.L)o.push(`Consumes ${kf(r.tot*D)} kWh al mes y el tope subsidiado es ${v.L} kWh. Los ${kf(r.tot*D-v.L)} kWh de más se cobran a tarifa plena: bajar ese consumo es lo que más te ahorra.`);
+  return o;
+}
+function ajustes(v){
+  const o=[],A=v.A,x=A.cover;
+  if(v.E<=3&&v.pp>0){o.push([`Subsidio estrato ${v.E}: ${v.pp} % sobre los primeros ${kf(x)} kWh`,-A.sub]);if(A.base&&v.A.cover<(v.r.tot*v.dias))o.push([`Los ${kf(v.r.tot*v.dias-v.L)} kWh sobre el tope de ${v.L} kWh se cobran a tarifa plena`,null])}
+  if(v.E>=5&&v.pp>0)o.push([`Contribución estrato ${v.E}: ${v.pp} % sobre el costo de energía`,A.con]);
+  if(v.E===4)o.push(["Estrato 4: tarifa plena, sin subsidio ni contribución",null]);
+  return o;
+}
+function renderExtras(){
+  const v=inv(),r=v.r,D=v.dias,fd=x=>x.toLocaleDateString("es-CO"),kv=(a,b)=>`<b>${a}</b><span>${b}</span>`;
+  $("tips").innerHTML=tips(r,D,v).map(t=>`<li>${t}</li>`).join("");
+  const rows=v.plan==="franjas"?["valle","normal","punta"].map(z=>`<tr><td>${NAME[z]} (${RNG[z]})</td><td>${kf(r.t[z]*D)}</td><td>${money(r.p[z])}</td><td>${money(r.cost[z]*D)}</td></tr>`).join(""):`<tr><td>Plano (todas las horas)</td><td>${kf(r.tot*D)}</td><td>${money(r.p.plano)}</td><td>${money(r.pl*D)}</td></tr>`;
+  $("f-view").innerHTML=`<p class="muted">Factura N.º ${v.num}</p><div class="kv">${kv("Cliente",v.cli)}${kv("NIT",v.nit)}${kv("Casa",v.casa)}${kv("Ciudad de facturación",v.ciudad)}${kv("Estrato",v.E)}${kv("Mes facturado",v.MES+" ("+D+" días)")}${kv("Fecha de emisión",fd(v.now))}${kv("Pagar antes del",fd(v.lim))}${kv("Plan facturado",v.plan==="franjas"?"Por franjas":"Plano")}${kv("Consumo diario",kf(r.tot)+" kWh")}${kv("Consumo mensual",kf(r.tot*D)+" kWh")}</div><table><thead><tr><th>Concepto</th><th>kWh del mes</th><th>Precio</th><th>Valor</th></tr></thead><tbody>${rows}</tbody></table><table><tbody><tr><td>Subtotal de energía</td><td>${money(v.A.base)}</td></tr>${ajustes(v).map(a=>`<tr><td>${a[0]}</td><td>${a[1]==null?"":money(a[1])}</td></tr>`).join("")}</tbody></table><div class="total">Total a pagar: ${money(v.mTot)}</div><h3>Códigos de pago</h3><div class="kv">${kv("Referencia de pago",v.ref)}${kv("Código de cliente",(v.nd||"sin NIT")+"-"+v.casa)}${kv("Código de convenio",v.conv)}</div>`;
+}
+async function descargar(){
+  const msg=$("msg");msg.textContent="";
+  if(!window.jspdf){msg.textContent="No se pudo cargar el generador de PDF. Usa Imprimir.";return}
+  const v=inv(),r=v.r,D=v.dias,d=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
+  const pm=n=>"$"+Math.round(n).toLocaleString("es-CO"),G=[0,108,73],fd=x=>x.toLocaleDateString("es-CO"),cl=s=>String(s).replace(/\u00a0/g," ");
+  const T=(s,x,y,o)=>d.text(cl(s),x,y,o);
+  const F=(b,sz,c)=>{d.setFont("helvetica",b?"bold":"normal");d.setFontSize(sz);d.setTextColor(...(c||[30,30,30]))};
+  const P=(s,x,y,w)=>{const L=d.splitTextToSize(cl(s),w);d.text(L,x,y);return y+L.length*4.6};
+  const box=(x,y,w,h,t)=>{d.setDrawColor(190);d.setLineWidth(.3);d.roundedRect(x,y,w,h,2,2);d.setFillColor(231,240,235);d.rect(x+.2,y+.2,w-.4,7,"F");F(1,10);T(t,x+3,y+5)};
+  const kv=(x,y,k,val)=>{F(0,8,[90,90,90]);T(k,x,y);F(1,10);T(d.splitTextToSize(cl(val),52)[0],x+36,y)};
+  const foot=n=>{F(0,8,[110,110,110]);T("Documento informativo generado por AeroVento con los datos ingresados. Valores en pesos colombianos (COP). Página "+n+" de 2.",15,289)};
+  const list=(t,y,items)=>{F(0,10);const L=items.map(s=>d.splitTextToSize("- "+cl(s),170)),h=12+L.reduce((a,l)=>a+l.length*4.6+2,0);box(15,y,180,h,t);F(0,10);let yy=y+13;L.forEach(l=>{d.text(l,18,yy);yy+=l.length*4.6+2});return y+h+6};
+  d.setFillColor(...G);d.rect(0,0,210,30,"F");
+  F(1,22,[255,255,255]);T("AeroVento",15,15);F(0,10,[255,255,255]);T("Factura de energía por franjas horarias",15,23);
+  F(1,14,[255,255,255]);T("FACTURA",195,13,{align:"right"});F(0,10,[255,255,255]);T("N.º "+v.num,195,21,{align:"right"});
+  box(15,38,95,48,"Datos del cliente");
+  kv(18,48,"Cliente",v.cli);kv(18,56,"NIT",v.nit);kv(18,64,"Casa / cliente N.º",v.casa);kv(18,72,"Ciudad de facturación",v.ciudad);kv(18,80,"Estrato",v.E+(v.E<=3?" (subsidio)":v.E>=5?" (contribución)":" (tarifa plena)"));
+  box(115,38,80,48,"Resumen de pago");
+  F(0,8,[90,90,90]);T("Total a pagar",118,48);F(1,20,G);T(pm(v.mTot),118,58);
+  F(0,8,[90,90,90]);T("Pagar antes del",118,66);F(1,10);T(fd(v.lim),150,66);
+  F(0,8,[90,90,90]);T("Referencia de pago",118,74);F(1,12);T(v.ref,118,81);
+  box(15,92,180,20,"Periodo facturado");
+  kv(18,102,"Mes facturado",v.MES+" ("+D+" días)");kv(105,102,"Fecha de emisión",fd(v.now));
+  kv(18,108,"Plan facturado",v.plan==="franjas"?"Por franjas horarias":"Plano");kv(105,108,"Consumo del mes",kf(r.tot*D)+" kWh");
+  F(1,11);T("Detalle del consumo del mes",15,120);
+  d.setFillColor(231,240,235);d.rect(15,123,180,8,"F");F(1,9);
+  T("Concepto",17,128.5);T("kWh por día",108,128.5,{align:"right"});T("kWh del mes",135,128.5,{align:"right"});T("Precio por kWh",165,128.5,{align:"right"});T("Valor del mes",193,128.5,{align:"right"});
+  const rows=v.plan==="franjas"?["valle","normal","punta"].map(z=>["Franja "+NAME[z]+" ("+RNG[z]+")",r.t[z],r.p[z],r.cost[z]*D]):[["Energía a precio plano (todas las horas)",r.tot,r.p.plano,r.pl*D]];
+  let y=138;
+  rows.forEach(([a,b,c,e])=>{F(0,10);T(a,17,y);T(kf(b),108,y,{align:"right"});T(kf(b*D),135,y,{align:"right"});T(pm(c),165,y,{align:"right"});T(pm(e),193,y,{align:"right"});d.setDrawColor(215);d.line(15,y+2.5,195,y+2.5);y+=8});
+  F(1,10);T("Subtotal de energía",17,y);T(kf(r.tot),108,y,{align:"right"});T(kf(r.tot*D),135,y,{align:"right"});T(pm(v.A.base),193,y,{align:"right"});
+  ajustes(v).forEach(a=>{y+=7;F(0,9);T(a[0],17,y);if(a[1]!=null)T((a[1]<0?"-":"")+pm(Math.abs(a[1])),193,y,{align:"right"})});
+  y+=8;d.setFillColor(231,240,235);d.rect(15,y-5.5,180,8,"F");F(1,11);T("Total a pagar",17,y);T(pm(v.mTot),193,y,{align:"right"});
+  const df=v.mAlt-v.mTot;F(0,10);
+  y=P(`Comparación: con el plan ${v.altN} habrías pagado ${pm(v.mAlt)} este mes. `+(df>0?`Con el plan facturado ahorras ${pm(df)}.`:df<0?`El plan ${v.altN} habría sido ${pm(-df)} más barato.`:"Ambos planes cuestan lo mismo."),15,y+10,180)+6;
+  box(15,y,180,34,"Códigos de pago");
+  kv(18,y+14,"Referencia de pago",v.ref);kv(18,y+21,"Código de cliente",(v.nd||"sin NIT")+"-"+v.casa);kv(18,y+28,"Código de convenio",v.conv);
+  F(0,9,[60,60,60]);P("Presenta la referencia de pago en el punto o canal de recaudo de tu entidad antes de la fecha límite.",110,y+14,80);
+  foot(1);
+  d.addPage();F(1,12);T("Factura N.º "+v.num+": detalle y sugerencias",15,16);
+  box(15,22,180,52,"Consumo por hora de un día típico (kWh)");
+  const col={valle:[47,111,179],normal:[183,121,31],punta:[194,59,78]};
+  for(let h=0;h<24;h++){const x=17+(h%12)*14.5,yy=33+Math.floor(h/12)*16;d.setFillColor(...col[Z(h)]);d.rect(x,yy,13.5,5.5,"F");F(1,8,[255,255,255]);T(String(h).padStart(2,"0")+":00",x+6.75,yy+3.9,{align:"center"});F(0,9);T(kf(kwh[h]),x+6.75,yy+10,{align:"center"})}
+  F(0,8,[90,90,90]);P("Azul: valle. Ámbar: normal. Rojo: punta. El consumo del mes se calcula multiplicando este día típico por "+D+" días.",17,65,176);
+  let y2=list("Sugerencias para ahorrar",80,tips(r,D,v));
+  list("Cómo leer tu factura",y2,["kWh: unidad de energía. Un equipo de 1.000 vatios encendido una hora gasta 1 kWh.","Franja valle (10 p. m. a 5:59 a. m.): la energía más barata.","Franja normal (6 a. m. a 5:59 p. m.): precio intermedio.","Franja punta (6 p. m. a 9:59 p. m.): la energía más cara.","Plan plano: un solo precio por kWh a toda hora.","Consumo del mes: estimado a partir de tu día típico, multiplicado por los días del mes.","Subsidio (estratos 1, 2 y 3): descuento solo sobre el consumo de subsistencia. Lo que pase de ese tope se cobra a tarifa plena.","Contribución (estratos 5 y 6): recargo sobre el costo de la energía."]);
+  foot(2);
+  const dl=window.claude?await window.claude.use("downloads"):null;
+  if(!dl){try{d.save("factura-"+v.num+".pdf");msg.textContent="Factura descargada."}catch(e){msg.textContent="No se pudo descargar. Abre la factura y usa Imprimir para guardarla como PDF."}return}
+  try{await dl.save({filename:"factura-"+v.num+".pdf",data:d.output("arraybuffer")});msg.textContent="Factura descargada."}
+  catch(e){msg.textContent=e&&e.code==="declined"?"Descarga cancelada.":"No se pudo descargar. Usa Imprimir para guardarla como PDF."}
+}
+const DEF={1:60,2:50,3:15,4:0,5:20,6:20};
+const NOTA={1:"Subsidio de hasta 60 % sobre el consumo de subsistencia.",2:"Subsidio de hasta 50 % sobre el consumo de subsistencia.",3:"Subsidio de hasta 15 % sobre el consumo de subsistencia.",4:"Tarifa plena: no recibe subsidio ni paga contribución.",5:"Paga una contribución de hasta 20 % sobre el costo de la energía.",6:"Paga una contribución de hasta 20 % sobre el costo de la energía."};
+function setPct(){const e=+$("estrato").value;$("pct").value=DEF[e];$("pct").max=DEF[e];$("pct").disabled=e===4;$("lpct").textContent=e<=3?"Subsidio aplicado (%)":e>=5?"Contribución aplicada (%)":"Sin subsidio ni contribución";$("estnota").textContent=NOTA[e]+(e<=3?" Solo hasta el tope de subsistencia de tu zona; el resto se cobra a tarifa plena.":"")}
+$("estrato").addEventListener("change",()=>{setPct();update()});
+setPct();
+$("f-plan").addEventListener("change",update);
+$("mes").value=new Date().toISOString().slice(0,7);
+["btnPdf1","btnPdf2"].forEach(id=>$(id).addEventListener("click",descargar));
+update();
+</script>
+</body>
+</html>
